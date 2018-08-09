@@ -69,11 +69,6 @@ void main(List<String> args) {
       for (var type in unit.types) {
         if (type.isPrivate) continue;
 
-        // HttpHeaders has constant names where camel-case members already exist
-        // (CONTENT_LENGTH etc). I don't want to guess what the migration for
-        // these will be so I'm just not converting them.
-        if (name == "io" && type.displayName == "HttpHeaders") continue;
-
         var dart2Type = _find(dart2Library, type.displayName);
         if (dart2Type == null) continue;
 
@@ -85,6 +80,11 @@ void main(List<String> args) {
         buffer.writeln("abstract class ${type.displayName} {");
         for (var constant in constants) {
           var newName = _camelCase(constant.displayName);
+
+          if (name == "io" && type.displayName == "HttpHeaders") {
+            newName += "Header";
+          }
+
           var useNewName = !generateDart1 && _find(dart2Type, newName) != null;
           if (!useNewName && _find(dart2Type, constant.displayName) == null) {
             continue;
