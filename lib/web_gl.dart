@@ -224,6 +224,7 @@ const stencilBufferBit = web_gl.STENCIL_BUFFER_BIT;
 const stencilClearValue = web_gl.STENCIL_CLEAR_VALUE;
 const stencilFail = web_gl.STENCIL_FAIL;
 const stencilFunc = web_gl.STENCIL_FUNC;
+const stencilIndex = web_gl.STENCIL_INDEX;
 const stencilIndex8 = web_gl.STENCIL_INDEX8;
 const stencilPassDepthFail = web_gl.STENCIL_PASS_DEPTH_FAIL;
 const stencilPassDepthPass = web_gl.STENCIL_PASS_DEPTH_PASS;
@@ -312,6 +313,13 @@ const zero = web_gl.ZERO;
 abstract class AngleInstancedArrays {
   static const vertexAttribArrayDivisorAngle =
       web_gl.AngleInstancedArrays.VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE;
+}
+
+abstract class ChromiumSubscribeUniform {
+  static const mousePositionChromium =
+      web_gl.ChromiumSubscribeUniform.MOUSE_POSITION_CHROMIUM;
+  static const subscribedValuesBufferChromium =
+      web_gl.ChromiumSubscribeUniform.SUBSCRIBED_VALUES_BUFFER_CHROMIUM;
 }
 
 abstract class CompressedTextureAstc {
@@ -791,6 +799,7 @@ abstract class RenderingContext {
   static const stencilClearValue = web_gl.RenderingContext.STENCIL_CLEAR_VALUE;
   static const stencilFail = web_gl.RenderingContext.STENCIL_FAIL;
   static const stencilFunc = web_gl.RenderingContext.STENCIL_FUNC;
+  static const stencilIndex = web_gl.RenderingContext.STENCIL_INDEX;
   static const stencilIndex8 = web_gl.RenderingContext.STENCIL_INDEX8;
   static const stencilPassDepthFail =
       web_gl.RenderingContext.STENCIL_PASS_DEPTH_FAIL;
@@ -1167,6 +1176,7 @@ abstract class RenderingContext2 {
   static const stencilClearValue = web_gl.RenderingContext2.STENCIL_CLEAR_VALUE;
   static const stencilFail = web_gl.RenderingContext2.STENCIL_FAIL;
   static const stencilFunc = web_gl.RenderingContext2.STENCIL_FUNC;
+  static const stencilIndex = web_gl.RenderingContext2.STENCIL_INDEX;
   static const stencilIndex8 = web_gl.RenderingContext2.STENCIL_INDEX8;
   static const stencilPassDepthFail =
       web_gl.RenderingContext2.STENCIL_PASS_DEPTH_FAIL;

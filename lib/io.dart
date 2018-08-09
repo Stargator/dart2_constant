@@ -158,6 +158,8 @@ abstract class HttpHeaders {
   static const requestHeadersHeader = io.HttpHeaders.REQUEST_HEADERS;
 }
 
+abstract class ContentType {}
+
 abstract class HttpClient {
   static const defaultHttpPort = io.HttpClient.DEFAULT_HTTP_PORT;
   static const defaultHttpsPort = io.HttpClient.DEFAULT_HTTPS_PORT;
@@ -200,6 +202,8 @@ abstract class InternetAddressType {
   static const ipV6 = io.InternetAddressType.IP_V6;
   static const any = io.InternetAddressType.ANY;
 }
+
+abstract class InternetAddress {}
 
 abstract class SocketDirection {
   static const receive = io.SocketDirection.RECEIVE;

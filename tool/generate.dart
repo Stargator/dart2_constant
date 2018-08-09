@@ -52,6 +52,8 @@ void main(List<String> args) {
     var dart2Library = _library(dart2, url);
     for (var unit in [dart1Library.definingCompilationUnit]
       ..addAll(dart1Library.parts)) {
+      if (unit.displayName.contains('dartium')) continue;
+
       for (var variable in unit.topLevelVariables) {
         if (!_isCapsConstant(variable)) continue;
 
@@ -67,6 +69,10 @@ void main(List<String> args) {
       }
 
       for (var type in unit.types) {
+        if (type.displayName == "InternetAddress") {
+          print('private? => ${type.isPrivate}');
+        }
+
         if (type.isPrivate) continue;
 
         var dart2Type = _find(dart2Library, type.displayName);
@@ -75,7 +81,12 @@ void main(List<String> args) {
         var constants = type.fields
             .where((field) => field.isStatic && _isCapsConstant(field))
             .toList();
-        if (constants.isEmpty) continue;
+
+        var staticCaps = type.fields
+            .where((field) => _getStaticCapFields(field))
+            .toList();
+
+        if (constants.isEmpty && staticCaps.isEmpty) continue;
 
         buffer.writeln("abstract class ${type.displayName} {");
         for (var constant in constants) {
@@ -94,7 +105,43 @@ void main(List<String> args) {
           buffer.write(useNewName ? newName : constant.displayName);
           buffer.writeln(";");
         }
+
+        for (var staticCap in staticCaps) { // TODO: Make loop generic and merge logic with constants loop
+          var newName = _camelCase(staticCap.displayName);
+
+          if (name == "io" && (type.displayName == "InternetAddress" || type.displayName == "ContentType")) {
+            print('name: $name || type.displayName: ${type.displayName}');
+          }
+
+          if (name == "typed_data" && type.displayName == "Endian") {
+            newName = newName.replaceAll("Endian", "");
+          }
+
+          var useNewName = !generateDart1 && _find(dart2Library, newName) != null;
+          if (!useNewName && _find(dart2Library, staticCap.displayName) == null) {
+            continue;
+          }
+
+          buffer.write("static ${staticCap.type} get $newName = $name.");
+          buffer.write(useNewName ? newName : staticCap.displayName);
+          buffer.writeln(";");
+        }
+
+//        for (var variable in unit.topLevelVariables) {
+//          if (!_isCapsStaticFinal(variable)) continue;
+//
+//          var newName = _camelCase(variable.displayName);
+//          var useNewName = !generateDart1 && _find(dart2Library, newName) != null;
+//          if (!useNewName && _find(dart2Library, variable.displayName) == null) {
+//            continue;
+//          }
+//
+//          buffer.write("static final $newName = $name.");
+//          buffer.write(useNewName ? newName : variable.displayName);
+//          buffer.writeln(";");
+//        }
         buffer.writeln("}");
+
       }
     }
     if (buffer.isEmpty) continue;
@@ -108,6 +155,10 @@ import '$url' as $name;
 
 ${new DartFormatter().format(buffer.toString())}""");
   }
+}
+
+bool _getStaticCapFields(FieldElement field) {
+      return _isCapsStatic(field);
 }
 
 /// Returns an analysis context for the sdk at [sdkDir].
@@ -162,13 +213,37 @@ bool _isCapsConstant(VariableElement variable) {
   return true;
 }
 
+/// Returns whether [variable] is a screaming-caps static variable that should be
+/// polyfilled to be camel-case.
+bool _isCapsStatic(VariableElement variable) {
+  if (!variable.isStatic) return false;
+  if (variable.isConst) return false;
+  if (_skip.contains(variable.displayName)) return false;
+  if (!variable.displayName.contains(new RegExp("^[A-Z]"))) return false;
+  return true;
+}
+
+/// Returns whether [variable] is a screaming-caps static final variable that should be
+/// polyfilled to be camel-case.
+bool _isCapsStaticFinal(VariableElement variable) {
+  if (!_isCapsStatic(variable)) return false;
+  if (variable.isConst) return false;
+  if (!variable.isFinal) return false;
+  return true;
+}
+
 /// Special-case identifiers whose camel-casing doesn't follow the normal logic.
 final _specialCases = {
   "BASE64URL": "base64Url",
   "SQRT1_2": "sqrt1_2",
   "BIG_ENDIAN": "big",
   "LITTLE_ENDIAN": "little",
-  "HOST_ENDIAN": "host"
+  "HOST_ENDIAN": "host",
+  "ANY_IP_V4": "anyIPv4",
+  "ANY_IP_V6": "anyIPv6",
+  "LOOPBACK_IP_V4": "loopbackIPv4",
+  "LOOPBACK_IP_V6": "loopbackIPv6"
+
 };
 
 /// Converts a screaming-caps string [caps] to camel-case.
